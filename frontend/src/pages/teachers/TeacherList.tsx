@@ -9,7 +9,7 @@ export default function TeacherList() {
   const [budget, setBudget] = useState(0);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
-  
+
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
@@ -134,8 +134,15 @@ export default function TeacherList() {
                   <td><span className="fw-700">{t.teacherId}</span></td>
                   <td>
                     <div className="d-flex align-items-center gap-2">
-                      <img src={t.photo ? `http://localhost:5000${t.photo}` : "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNhMGFlYzAiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlMmU4ZjAiLz48cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+"} className="teacher-avatar" alt="" />
-                      <span className="fw-600">{t.firstName} {t.lastName}</span>
+                      <img
+                        src={
+                          t.photo
+                            ? t.photo
+                            : "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNhMGFlYzAiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlMmU4ZjAiLz48cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+"
+                        }
+                        className="teacher-avatar"
+                        alt=""
+                      />                      <span className="fw-600">{t.firstName} {t.lastName}</span>
                     </div>
                   </td>
                   <td>{t.subject}</td>
