@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Topnav from './components/Topnav';
 import Login from './pages/Login';
@@ -25,7 +25,13 @@ import Settings from './pages/Settings';
 
 function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarShow, setSidebarShow] = useState(false);
+  const location = useLocation();
   const token = localStorage.getItem('stc_token');
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarShow(false);
+  }, [location.pathname]);
 
   if (!token) {
     return <Navigate to="/login" replace />;
@@ -34,6 +40,7 @@ function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div>
       <Sidebar show={sidebarShow} onToggle={() => setSidebarShow(!sidebarShow)} />
+      {sidebarShow && <div className="sidebar-backdrop" onClick={() => setSidebarShow(false)} />}
       <Topnav onToggleSidebar={() => setSidebarShow(!sidebarShow)} />
       <div id="main-content">
         {children}
