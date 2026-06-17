@@ -40,8 +40,20 @@ export default function TeacherDetail() {
         <div className="col-12 col-lg-4">
           <div className="card border-0 shadow-sm text-center p-4 mb-4" style={{ borderRadius: '16px' }}>
             <div className="mb-3">
-              <img src={teacher.photo ? `http://localhost:5000${teacher.photo}` : "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNhMGFlYzAiPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9IiNlMmU4ZjAiLz48cGF0aCBkPSJNMTIgMTJjMi4yMSAwIDQtMS43OSA0LTRzLTEuNzktNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+"} className="rounded-circle border" style={{ width: '120px', height: '120px', objectFit: 'cover' }} alt="" />
-            </div>
+              <img
+                src={
+                  teacher.photo
+                    ? teacher.photo
+                    : "data:image/svg+xml;base64,PHN2Zy..."
+                }
+                className="rounded-circle border"
+                style={{
+                  width: "120px",
+                  height: "120px",
+                  objectFit: "cover",
+                }}
+                alt=""
+              />            </div>
             <h4 className="fw-bold mb-1">{teacher.firstName} {teacher.lastName}</h4>
             <p className="text-muted fs-13 mb-2">{teacher.teacherId}</p>
             <span className={`badge ${teacher.status === 'Active' ? 'badge-active' : 'badge-inactive'} d-inline-block mx-auto mb-3`}>{teacher.status}</span>

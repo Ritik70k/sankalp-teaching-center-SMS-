@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../services/prisma.service';
 import { generateTeacherId, logActivity } from '../utils/helper';
+import { deleteCloudinaryImage } from "../utils/cloudinary.helper";
 
 export async function getTeachers(req: Request, res: Response) {
   const { search, status } = req.query;
@@ -28,7 +29,7 @@ export async function getTeachers(req: Request, res: Response) {
 
     const enriched = teachers.map(t => {
       const paid = t.payments.reduce((acc, curr) => acc + Number(curr.paidAmount), 0);
-      
+
       // Calculate months worked since joining
       const joinDate = new Date(t.joiningDate);
       const today = new Date();
@@ -85,7 +86,7 @@ export async function createTeacher(req: Request, res: Response) {
   const data = req.body;
   try {
     const teacherId = await generateTeacherId();
-    const photo = req.file ? `/uploads/${req.file.filename}` : '';
+    const photo = req.file ? (req.file as any).path : '';
 
     const newTeacher = await prisma.teacher.create({
       data: {
@@ -118,7 +119,15 @@ export async function updateTeacher(req: Request, res: Response) {
   try {
     const teacher = await prisma.teacher.findUnique({ where: { id: parseInt(id as string) } });
     if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
-    const photo = req.file ? `/uploads/${req.file.filename}` : teacher.photo;
+    let photo = teacher.photo;
+
+    if (req.file) {
+      if (teacher.photo) {
+        await deleteCloudinaryImage(teacher.photo);
+      }
+
+      photo = (req.file as any).path;
+    }
 
     const updated = await prisma.teacher.update({
       where: { id: parseInt(id as string) },
@@ -151,7 +160,13 @@ export async function deleteTeacher(req: Request, res: Response) {
     const teacher = await prisma.teacher.findUnique({ where: { id: parseInt(id as string) } });
     if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
 
-    await prisma.teacher.delete({ where: { id: parseInt(id as string) } });
+    if (teacher.photo) {
+      await deleteCloudinaryImage(teacher.photo);
+    }
+
+    await prisma.teacher.delete({
+      where: { id: parseInt(id as string) }
+    });
     await logActivity('admin', 'Teacher Deleted', `Deleted teacher ${teacher.teacherId} (${teacher.firstName} ${teacher.lastName})`);
     return res.json({ message: 'Teacher deleted successfully' });
   } catch (error: any) {

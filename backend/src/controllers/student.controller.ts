@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import prisma from '../services/prisma.service';
 import { generateStudentId, logActivity } from '../utils/helper';
+import { deleteCloudinaryImage } from "../utils/cloudinary.helper";
 
 export async function getStudents(req: Request, res: Response) {
   const { search, batchId, status, page = '1', limit = '10' } = req.query;
@@ -95,7 +96,7 @@ export async function createStudent(req: Request, res: Response) {
   const data = req.body;
   try {
     const studentId = await generateStudentId();
-    const photo = req.file ? `/uploads/${req.file.filename}` : '';
+    const photo = req.file ? (req.file as any).path : '';
 
     const newStudent = await prisma.student.create({
       data: {
@@ -130,7 +131,15 @@ export async function updateStudent(req: Request, res: Response) {
   try {
     const student = await prisma.student.findUnique({ where: { id: parseInt(id as string) } });
     if (!student) return res.status(404).json({ error: 'Student not found' });
-    const photo = req.file ? `/uploads/${req.file.filename}` : student.photo;
+    let photo = student.photo;
+
+    if (req.file) {
+      if (student.photo) {
+        await deleteCloudinaryImage(student.photo);
+      }
+
+      photo = (req.file as any).path;
+    }
 
     const updated = await prisma.student.update({
       where: { id: parseInt(id as string) },
@@ -164,7 +173,13 @@ export async function deleteStudent(req: Request, res: Response) {
   try {
     const student = await prisma.student.findUnique({ where: { id: parseInt(id as string) } });
     if (!student) return res.status(404).json({ error: 'Student not found' });
-    await prisma.student.delete({ where: { id: parseInt(id as string) } });
+    if (student.photo) {
+      await deleteCloudinaryImage(student.photo);
+    }
+
+    await prisma.student.delete({
+      where: { id: parseInt(id as string) }
+    });
     await logActivity('admin', 'Student Deleted', `Deleted student ${student.studentId} (${student.firstName} ${student.lastName})`);
     return res.json({ message: 'Student deleted successfully' });
   } catch (error: any) {
