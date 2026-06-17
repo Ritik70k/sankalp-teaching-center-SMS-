@@ -1,0 +1,175 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum Status {
+  Active
+  Inactive
+}
+
+enum PaymentMode {
+  Cash
+  Online
+  Cheque
+  UPI
+  BankTransfer @map("Bank Transfer")
+}
+
+enum AttendanceStatus {
+  Present
+  Absent
+}
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      UserRole @default(ADMIN)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Batch {
+  id           Int       @id @default(autoincrement())
+  batchName    String    @map("batch_name")
+  courseName   String    @map("course_name")
+  facultyName  String    @map("faculty_name")
+  batchTiming  String    @map("batch_timing")
+  startDate    DateTime  @map("start_date") @db.Date
+  academicYear String    @map("academic_year")
+  endDate      DateTime? @map("end_date") @db.Date
+  description  String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  students     Student[]
+
+  @@map("batches")
+}
+
+model Student {
+  id            Int          @id @default(autoincrement())
+  studentId     String       @unique @map("student_id")
+  firstName     String       @map("first_name")
+  lastName      String       @map("last_name")
+  gender        Gender
+  dateOfBirth   DateTime?    @map("date_of_birth") @db.Date
+  photo         String?
+  fatherName    String?      @map("father_name")
+  motherName    String?      @map("mother_name")
+  mobile        String
+  email         String?
+  address       String?
+  course        String
+  batchId       Int?         @map("batch_id")
+  batch         Batch?       @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  admissionDate DateTime     @default(now()) @map("admission_date") @db.Date
+  totalFees     Decimal      @default(0.00) @map("total_fees") @db.Decimal(10, 2)
+  status        Status       @default(Active)
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  attendances   Attendance[]
+  payments      Payment[]
+
+  @@map("students")
+}
+
+model Teacher {
+  id            Int              @id @default(autoincrement())
+  teacherId     String           @unique @map("teacher_id")
+  firstName     String           @map("first_name")
+  lastName      String           @map("last_name")
+  gender        Gender
+  photo         String?
+  mobile        String
+  email         String?
+  address       String?
+  qualification String
+  subject       String
+  joiningDate   DateTime         @default(now()) @map("joining_date") @db.Date
+  monthlySalary Decimal          @default(0.00) @map("monthly_salary") @db.Decimal(10, 2)
+  status        Status           @default(Active)
+  createdAt     DateTime         @default(now()) @map("created_at")
+  updatedAt     DateTime         @updatedAt @map("updated_at")
+  payments      TeacherPayment[]
+
+  @@map("teachers")
+}
+
+model Attendance {
+  id        Int              @id @default(autoincrement())
+  studentId Int              @map("student_id")
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  date      DateTime         @db.Date
+  status    AttendanceStatus @default(Present)
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  @@unique([studentId, date])
+  @@map("attendances")
+}
+
+model Payment {
+  id            Int         @id @default(autoincrement())
+  studentId     Int         @map("student_id")
+  student       Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  paidAmount    Decimal     @map("paid_amount") @db.Decimal(10, 2)
+  paymentDate   DateTime    @map("payment_date") @db.Date
+  paymentMode   PaymentMode @default(Cash) @map("payment_mode")
+  transactionId String?     @map("transaction_id")
+  notes         String?
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  @@map("payments")
+}
+
+model TeacherPayment {
+  id            Int         @id @default(autoincrement())
+  teacherId     Int         @map("teacher_id")
+  teacher       Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  paidAmount    Decimal     @map("paid_amount") @db.Decimal(10, 2)
+  paymentDate   DateTime    @map("payment_date") @db.Date
+  paymentMode   PaymentMode @default(Cash) @map("payment_mode")
+  transactionId String?     @map("transaction_id")
+  notes         String?
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  @@map("teacher_payments")
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  user      String
+  timestamp DateTime @default(now())
+  details   String?
+
+  @@map("activity_logs")
+}
+
+model SystemSetting {
+  id                Int      @id @default(1)
+  institutionName   String   @default("Sankalp Teaching Center") @map("institution_name")
+  currencySymbol    String   @default("₹") @map("currency_symbol")
+  defaultStudentFee Decimal  @default(15000.00) @map("default_student_fee") @db.Decimal(10, 2)
+  address           String?
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
