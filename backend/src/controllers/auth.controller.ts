@@ -2,8 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../services/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || "sankalp_teaching_center_super_secret_jwt_key_2026";
+import { getJwtSecret } from '../middleware/auth.middleware';
 
 export async function login(req: Request, res: Response) {
   const { username, password } = req.body;
@@ -22,7 +21,7 @@ export async function login(req: Request, res: Response) {
 
     const token = jwt.sign(
       { userId: user.id, username: user.username, role: user.role },
-      JWT_SECRET,
+      getJwtSecret(),
       { expiresIn: '24h' }
     );
 
