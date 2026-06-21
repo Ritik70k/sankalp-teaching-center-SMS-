@@ -18,6 +18,21 @@ client.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+// Intercept expired or invalid token errors to force redirect to login
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      localStorage.removeItem('stc_token');
+      localStorage.removeItem('stc_user');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Helper to format responses
 const responseBody = (response: any) => response.data;
 
